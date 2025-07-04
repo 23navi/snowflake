@@ -95,3 +95,58 @@ The above command filed to return the first line, that means that there was an e
 
 Numeric value 'one thousand' is not recognized	: returnfailed/OrderDetails_error.csv :	2
 */
+
+
+
+
+
+--- -- Practice
+
+
+
+-- Prepare database & table
+CREATE OR REPLACE DATABASE COPY_DB;
+
+
+CREATE OR REPLACE TABLE  COPY_DB.PUBLIC.employees (
+  customer_id int,
+  first_name varchar(50),
+  last_name varchar(50),
+  email varchar(50),
+  age int,
+  department varchar(50)
+  );
+
+
+create or replace stage copy_db.public.aws_stage_excercise
+    url ='s3://snowflake-assignments-mc/copyoptions/example1';
+
+
+LS @copy_db.public.aws_stage_excercise;
+-- We get 1 file
+
+
+create or replace schema manage_db.file_formates;
+
+create or replace file format manage_db.file_formates.aws_stage_excercise_ffo
+    TYPE=csv
+    FIELD_DELIMITER=','
+    SKIP_HEADER=1;
+
+
+
+copy into COPY_DB.PUBLIC.employees
+    from @copy_db.public.aws_stage_excercise
+    file_format = (format_name=manage_db.file_formates.aws_stage_excercise_ffo)
+    validation_mode=return_errors;
+-- We got one error
+
+
+
+copy into COPY_DB.PUBLIC.employees
+    from @copy_db.public.aws_stage_excercise
+    file_format = (format_name=manage_db.file_formates.aws_stage_excercise_ffo)
+    -- validation_mode=return_errors;
+    ON_Error=Continue
+
+select * from COPY_DB.PUBLIC.employees
