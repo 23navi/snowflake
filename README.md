@@ -50,3 +50,11 @@ This means Snowflake combines the benefits of two classic database architectures
         🔹 There is no resource contention between different warehouses.
 
         Each query runs in its own isolated compute environment, and scaling is horizontal (you can spin up more warehouses as needed).
+
+
+
+
+### Questions
+
+1) Which parameter can be used to set a minimum retention period on the account level for which data is retained when performing time travel? -> MIN_DATA_RETENTION_TIME_IN_DAYS
+
