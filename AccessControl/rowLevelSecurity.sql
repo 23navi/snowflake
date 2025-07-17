@@ -1,40 +1,5 @@
 -- ////// ROW ACCESS POLICIES ///////
 
-CREATE OR REPLACE DATABASE DATA_S;
-
-
-CREATE OR REPLACE STAGE aws_stage
-    url='s3://bucketsnowflakes3';
-
--- List files in stage
-LIST @aws_stage;
-
--- Create table
-CREATE OR REPLACE TABLE ORDERS (
-ORDER_ID	VARCHAR(30)
-,AMOUNT	NUMBER(38,0)
-,PROFIT	NUMBER(38,0)
-,QUANTITY	NUMBER(38,0)
-,CATEGORY	VARCHAR(30)
-,SUBCATEGORY	VARCHAR(30));
-
-
-CREATE OR REPLACE DATABASE MANAGE_DB;
-
-CREATE OR REPLACE SCHEMA external_stages;
-
-CREATE OR REPLACE STAGE MANAGE_DB.external_stages.aws_stage
-    url='s3://bucketsnowflakes3';
-
-USE DATABASE DATA_S
-
--- Load data using copy command
-COPY INTO ORDERS
-    FROM @MANAGE_DB.external_stages.aws_stage
-    file_format= (type = csv field_delimiter=',' skip_header=1)
-    pattern='.*OrderDetails.*';
-    
-SELECT * FROM ORDERS;
 
 -- Table of interest
 SELECT * FROM DATA_S.PUBLIC.ORDERS;
@@ -54,16 +19,7 @@ grant select on table data_s.public.orders to role home_manager;
 
 grant usage on warehouse compute_wh to role home_manager;
 
-
-SHOW USERS;
-
-
-SHOW ROLES LIKE 'HOME_MANAGER';
-SHOW USERS LIKE '23NAVI';
-
-grant role home_manager to user "23NAVI";
-
-
+grant role home_manager to user nikolai;
 
 -- Table can be queried and all rows are visible
 USE ROLE home_manager;     
@@ -74,7 +30,7 @@ SELECT * FROM ORDERS;
 USE ROLE accountadmin;
 CREATE OR REPLACE ROW ACCESS POLICY category_policy
 AS (category varchar) RETURNS BOOLEAN ->
-  CASE WHEN 'HOME_MANAGER' = current_role()  and 'Furniture'=category AND CURRENT_ROW.QUANTITY >4 then true
+  CASE WHEN 'HOME_MANAGER' = current_role()  and 'Furniture'=category then true
       else false
       end;
 
